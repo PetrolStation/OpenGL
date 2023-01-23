@@ -4,12 +4,14 @@
 
 #include "OpenGLRenderer.h"
 #include "Core/Renderer/Texture.h"
+
+#include <Core/Components/VertexData.h>
+#include <Core/Components/Transform.h>
+#include <Core/Components/Mesh.h>
 #include <Core/Files.h>
-#include <Static/Components/Transform.h>
-#include <Static/Components/Mesh.h>
+
 #include <Static/Renderer/Text.h>
 #include "OpenGL.h"
-#include <Static/Components/VertexData.h>
 // TODO: !!!!! REMOVE STATIC RENDERER DEPENDENCY !!!!!
 
 namespace PetrolEngine {

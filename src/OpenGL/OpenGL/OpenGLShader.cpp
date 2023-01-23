@@ -7,10 +7,21 @@
 #include <spirv_cross.hpp>
 #include <spirv_glsl.hpp>
 #include <shaderc/shaderc.hpp>
+
+#include <glad/glad.h>
+
 //
 // INFO
 // 1. I use here properties of glShaderXXX(shader) which is stated at khronos site "A value of 0 for shader will be silently ignored."
 //
+
+void errorCheck()
+{
+    GLenum err;
+    while ( ( err = glGetError() ) != GL_NO_ERROR) {
+        std::cerr << err;
+    }
+}
 
 namespace PetrolEngine {
 
@@ -50,7 +61,7 @@ namespace PetrolEngine {
         uint fragmentShaderID = 0;
         uint geometryShaderID = 0;
         uint programID        = glCreateProgram();
-        auto a = glGetString(GL_VERSION);
+
         if (vertexByteCode) {
             Vector<uint32>* vertexByteCodeGlsl = fromSpvToGlslSpv(vertexByteCode, ShaderType::Vertex);
 
@@ -232,12 +243,12 @@ namespace PetrolEngine {
 
         glGetProgramiv(id, GL_LINK_STATUS, &success);
 
-        if (success)
+        if (success == GL_TRUE)
             return 0;
 
         glGetProgramInfoLog(id, 1024, nullptr, infoLog);
 
-        LOG( std::string("PROGRAM_LINKING_ERROR: ") + infoLog, 2);
+        LOG( std::string("PROGRAM_LINKING_ERROR: ") + std::string(infoLog), 2);
 
         return 1;
     }

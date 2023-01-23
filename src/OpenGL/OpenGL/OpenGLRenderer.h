@@ -8,10 +8,10 @@
 #include "OpenGLVertexArray.h"
 #include "OpenGLVertexBuffer.h"
 
-#include <Static/Components/Transform.h>
-#include <Static/Components/Material.h>
-#include <Static/Components/Camera.h>
-#include <Static/Renderer/Text.h>
+#include <Core/Components/Transform.h>
+#include <Core/Components/Material.h>
+#include <Core/Components/Camera.h>
+#include <Freetype/Renderer/Text.h>
 // TODO: make sure to move shader sources.
 
 namespace PetrolEngine {
