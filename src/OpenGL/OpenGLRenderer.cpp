@@ -288,7 +288,8 @@ namespace PetrolEngine {
     bool fir = false;
     UniformBuffer* ubo = nullptr;
     void OpenGLRenderer::renderMesh(const VertexArray* vao, const Transform& transform, const Vector<const Texture*>& textures, Shader* shader, const Camera* camera) { LOG_FUNCTION();
-		glUseProgram(shader->getID());
+		if(shader == nullptr) {LOG("ABORTING OBJECT PROVIDED WITH SHADER NULLPTR.", 2); return;}
+    glUseProgram(shader->getID());
 
         struct View {
             glm::mat4 model;

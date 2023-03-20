@@ -11,5 +11,10 @@ namespace PetrolEngine {
 		virtual void setData(const void* data, int64 size) override;
 
 		~OpenGLVertexBuffer() override;
+
+		const VertexLayout& getVertexLayout() { return layout; }
+		
+	private:
+		VertexLayout layout;
 	};
 }
