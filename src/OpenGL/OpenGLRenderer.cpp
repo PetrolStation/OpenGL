@@ -10,7 +10,7 @@
 #include <Core/Components/Mesh.h>
 #include <Core/Files.h>
 
-#include <Static/Renderer/Text.h>
+#include <Freetype/Renderer/Text.h>
 #include "OpenGL.h"
 // TODO: !!!!! REMOVE STATIC RENDERER DEPENDENCY !!!!!
 
