@@ -14,7 +14,7 @@ namespace PetrolEngine {
             TextureType type = TextureType::Texture2D
 		);
 
-        OpenGLTexture(const Image* image);
+        OpenGLTexture(const Image& image);
 		
 		~OpenGLTexture() override;
 

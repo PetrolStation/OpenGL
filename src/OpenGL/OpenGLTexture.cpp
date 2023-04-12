@@ -77,17 +77,17 @@ namespace PetrolEngine {
 		END:glGenerateMipmap(GLType);
 	}
 
-	OpenGLTexture::OpenGLTexture(const Image* image) {
+	OpenGLTexture::OpenGLTexture(const Image& image) {
 		this->id   = 0;
 
-		if (!image->getData()) {
+		if (!image.getData()) {
             LOG("Texture failed to load. ", 2); return;
         }
 
-		this->width  = image->getWidth();
-		this->height = image->getHeight();
+		this->width  = image.getWidth();
+		this->height = image.getHeight();
 
-        auto a = getFormat(image);
+                auto a = getFormat(image);
 		auto GLFormat = textureFormatLookupTable.at(a);
 
 		glGenTextures(1, &id);
@@ -102,7 +102,7 @@ namespace PetrolEngine {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glTexImage2D    (GL_TEXTURE_2D, 0, GLFormat.second, width, height, 0, GLFormat.first, GL_UNSIGNED_BYTE, image->getData());
+		glTexImage2D    (GL_TEXTURE_2D, 0, GLFormat.second, width, height, 0, GLFormat.first, GL_UNSIGNED_BYTE, image.getData());
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		// glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);

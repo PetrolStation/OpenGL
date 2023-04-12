@@ -34,7 +34,7 @@ namespace PetrolEngine {
                           const String& fragmentShader,
                           const String& geometryShader  ) override { return new OpenGLShader(name, vertexShader, fragmentShader, geometryShader); }
 
-        Texture* newTexture(const Image* image) override { return new OpenGLTexture(image); }
+        Texture* newTexture(const Image& image) override { return new OpenGLTexture(image); }
         Texture* newTexture(int width, int height, TextureFormat format, TextureType type)  override { return new OpenGLTexture(width, height, format, type); }
 
         Framebuffer* newFramebuffer(const FramebufferSpecification& spec) override { return new OpenGLFramebuffer(spec); }
