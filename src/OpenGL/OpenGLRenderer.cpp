@@ -52,10 +52,10 @@ namespace PetrolEngine {
         void addQuad(const Quad& quad){
             auto& pos = quad.position;
 
-            this->vertices.emplace_back(pos.x + 0          , pos.y + 0          , 0);
-            this->vertices.emplace_back(pos.x + quad.size.x, pos.y + 0          , 0);
-            this->vertices.emplace_back(pos.x + quad.size.x, pos.y + quad.size.y, 0);
-            this->vertices.emplace_back(pos.x + 0          , pos.y + quad.size.y, 0);
+            this->vertices.emplace_back(pos.x + 0          , pos.y + 0          , pos.z);
+            this->vertices.emplace_back(pos.x + quad.size.x, pos.y + 0          , pos.z);
+            this->vertices.emplace_back(pos.x + quad.size.x, pos.y + quad.size.y, pos.z);
+            this->vertices.emplace_back(pos.x + 0          , pos.y + quad.size.y, pos.z);
 
             const uint quadIndices[] = {0, 1, 2, 0, 2, 3};
 
@@ -187,6 +187,11 @@ namespace PetrolEngine {
         };
 
         batcher2D.addQuad(quad, shader, camera);
+
+for(auto batch : batcher2D.prepare()){
+            renderMesh(batch.vertexArray, Transform(), *batch.textures, batch.shader, camera);
+            batcher2D.clear();
+        }
     }
 
 	void OpenGLRenderer::setViewport(int x, int y, int width, int height) {
