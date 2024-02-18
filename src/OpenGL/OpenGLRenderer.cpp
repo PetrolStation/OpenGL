@@ -159,14 +159,16 @@ namespace PetrolEngine {
         Vector<BatchData> prepare(){
             Vector<BatchData> result;
 
-            for(auto& batch : this->batches)
+            for(auto& batch : this->batches){
                 result.emplace_back(batch.second.prepare(), batch.second.shader, &batch.second.textures);
+            }
 
             return result;
         }
 
         void clear(){
             for(auto& batch : this->batches) batch.second.clear();
+            batches.clear();
         }
 
         Batcher2D(){
@@ -188,8 +190,10 @@ namespace PetrolEngine {
 
         batcher2D.addQuad(quad, shader, camera);
 
-for(auto batch : batcher2D.prepare()){
-            renderMesh(batch.vertexArray, Transform(), *batch.textures, batch.shader, camera);
+        for(auto batch : batcher2D.prepare()){
+            Transform xd = Transform();
+            xd.parent = transform->parent;
+            renderMesh(batch.vertexArray, xd, *batch.textures, batch.shader, camera);
             batcher2D.clear();
         }
     }
@@ -221,7 +225,6 @@ for(auto batch : batcher2D.prepare()){
 //            0, camera->resolution.x,
 //            0, camera->resolution.y
 //        );
-
         float x = transform.position.x;
 		float y = transform.position.y;
 
@@ -245,8 +248,14 @@ for(auto batch : batcher2D.prepare()){
                 {w, h},
                 ch.coords
             };
+            Transform a({xPos, yPos, 0}, {w, h, 1});
+            a.parent = transform.parent;
+            //drawQuad2D(const Texture *texture, const Transform *transform, Shader *shader, const Camera *camera)
+            drawQuad2D(atlas, &a, shader, camera, ch.coords);
+            //std::cout<<atlas->getID()<<" - to id text\n";
 
-            batcher2D.addQuad(quad, shader, camera);
+
+            //batcher2D.addQuad(quad, shader, camera);
 //            characterMesh.vertices.push_back({xPos    , yPos + h, 0.f});
 //            characterMesh.vertices.push_back({xPos    , yPos    , 0.f});
 //            characterMesh.vertices.push_back({xPos + w, yPos    , 0.f});
@@ -265,10 +274,10 @@ for(auto batch : batcher2D.prepare()){
 			x += (float) (ch.advance >> 6) * transform.scale.x; // bitshift by 6 to get value in pixels (2^6 = 64)
 		}
 
-        for(auto batch : batcher2D.prepare()){
-            renderMesh(batch.vertexArray, Transform(), *batch.textures, batch.shader, camera);
-            batcher2D.clear();
-        }
+        //for(auto batch : batcher2D.prepare()){
+        //    renderMesh(batch.vertexArray, Transform(), *batch.textures, batch.shader, camera);
+        //    batcher2D.clear();
+        //}
 
 
 //        characterMesh.recalculateMesh();
@@ -294,6 +303,7 @@ for(auto batch : batcher2D.prepare()){
     UniformBuffer* ubo = nullptr;
     void OpenGLRenderer::renderMesh(const VertexArray* vao, const Transform& transform, const Vector<const Texture*>& textures, Shader* shader, const Camera* camera) { LOG_FUNCTION();
 		if(shader == nullptr) {LOG("ABORTING OBJECT PROVIDED WITH SHADER NULLPTR.", 2); return;}
+		glBindVertexArray(vao->getID());
     glUseProgram(shader->getID());
 
         struct View {
@@ -306,8 +316,8 @@ for(auto batch : batcher2D.prepare()){
             fir = true;
             ubo = OpenGL.newUniformBuffer(sizeof(View), 0);
         }
-
-        view.model      = transform.transformation;
+ 
+        view.model      = transform.getRelativeTransform().transformation;
         view.projection = camera->getPerspective();
         view.view       = camera->getViewMatrix ();
 
@@ -349,6 +359,7 @@ for(auto batch : batcher2D.prepare()){
 
 			//glActiveTexture(GL_TEXTURE0  + textureIndex);
             //glBindTexture  (GL_TEXTURE_2D, texture->getID());
+            //std::cout<<texture->getID()<<" - i chuj ci w\n";
             glBindTextureUnit(shader->metadata.textures[textureIndex], texture->getID());
 
             // shader->setUint("texture_diffuse"  + toString( diffuseNumber), textureIndex);
@@ -369,7 +380,6 @@ for(auto batch : batcher2D.prepare()){
         if(vao->getVertexBuffers().size() == 0)
             LOG("No vertex buffers at draw.", 3);
 
-		glBindVertexArray(vao->getID());
         //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vao->getIndexBuffer()->getID());
 
         //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vao->getIndexBuffer()->getID());
