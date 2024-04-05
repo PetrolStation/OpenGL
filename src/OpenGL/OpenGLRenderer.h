@@ -20,7 +20,8 @@ namespace PetrolEngine {
 	public:
 		// 2D stuff
 		void drawQuad2D(const Texture* texture, const Transform* transform, Shader* shader, const Camera* camera, glm::vec4 texCoords = {0,0,1,1}) override;
-
+		void draw() override;
+		
 		// 3D stuff
 		void renderMesh(const VertexArray* vao, const Transform& transform, const Vector<const Texture*>& textures, Shader* shader, const Camera* camera) override;
 

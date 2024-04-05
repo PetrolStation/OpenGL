@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 
+#include "Core/DebugTools.h"
 #include "OpenGLRenderer.h"
 #include "Core/Renderer/Texture.h"
 
@@ -132,9 +133,13 @@ namespace PetrolEngine {
     class Batcher2D{
     public:
         UnorderedMap<const Shader*, Batch2D> batches;
+        const Camera* camera;
+        const Transform* transform;
 
-        void addQuad(const Batch2D::Quad& quad, Shader* shader, const Camera* camera){
+        void addQuad(const Batch2D::Quad& quad, Shader* shader, const Transform* tra, const Camera* camera){
             auto batch = this->batches.find(shader);
+            this->camera = camera;
+            this->transform = tra;
 
             if(batch == this->batches.end()){
                 this->batches.emplace(shader, Batch2D(shader));
@@ -168,7 +173,6 @@ namespace PetrolEngine {
 
         void clear(){
             for(auto& batch : this->batches) batch.second.clear();
-            batches.clear();
         }
 
         Batcher2D(){
@@ -177,7 +181,7 @@ namespace PetrolEngine {
 
     } batcher2D;
 
-    void OpenGLRenderer::drawQuad2D(const Texture* texture, const Transform* transform, Shader* shader, const Camera* camera, glm::vec4 texCoords) {
+    void OpenGLRenderer::drawQuad2D(const Texture* texture, const Transform* transform, Shader* shader, const Camera* camera, glm::vec4 texCoords) { LOG_FUNCTION();
         auto pos = transform->position;
         auto size = transform->scale;
 
@@ -188,21 +192,25 @@ namespace PetrolEngine {
             texCoords
         };
 
-        batcher2D.addQuad(quad, shader, camera);
+        batcher2D.addQuad(quad, shader, transform, camera);
 
-        for(auto batch : batcher2D.prepare()){
-            Transform xd = Transform();
-            xd.parent = transform->parent;
-            renderMesh(batch.vertexArray, xd, *batch.textures, batch.shader, camera);
-            batcher2D.clear();
-        }
     }
 
-	void OpenGLRenderer::setViewport(int x, int y, int width, int height) {
+    void OpenGLRenderer::draw(){ LOG_FUNCTION();
+        for(auto batch : batcher2D.prepare()){
+            Transform a; // *batcher2D.transform->parent
+            renderMesh(batch.vertexArray, a, *batch.textures, batch.shader, batcher2D.camera);
+            batcher2D.clear();
+            delete  batcher2D.transform;
+        }
+
+    }
+
+	void OpenGLRenderer::setViewport(int x, int y, int width, int height) { LOG_FUNCTION();
 		glViewport(x, y, width, height);
 	}
 
-	int OpenGLRenderer::init(bool debug) {
+	int OpenGLRenderer::init(bool debug) { LOG_FUNCTION();
         LOG("Initializing OpenGL.", 1);
 
 		//if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -228,6 +236,8 @@ namespace PetrolEngine {
         float x = transform.position.x;
 		float y = transform.position.y;
 
+        Transform* a = new Transform();
+        a->parent = &transform;
         //glBindTexture(GL_TEXTURE_2D, atlas->getID());
 
         // iterate through all characters
@@ -248,55 +258,15 @@ namespace PetrolEngine {
                 {w, h},
                 ch.coords
             };
-            Transform a({xPos, yPos, 0}, {w, h, 1});
-            a.parent = transform.parent;
-            //drawQuad2D(const Texture *texture, const Transform *transform, Shader *shader, const Camera *camera)
-            drawQuad2D(atlas, &a, shader, camera, ch.coords);
-            //std::cout<<atlas->getID()<<" - to id text\n";
+            
+            a->position = {xPos, yPos, 0};
+            a->scale = {w, h, 1};
 
-
-            //batcher2D.addQuad(quad, shader, camera);
-//            characterMesh.vertices.push_back({xPos    , yPos + h, 0.f});
-//            characterMesh.vertices.push_back({xPos    , yPos    , 0.f});
-//            characterMesh.vertices.push_back({xPos + w, yPos    , 0.f});
-//            characterMesh.vertices.push_back({xPos    , yPos + h, 0.f});
-//            characterMesh.vertices.push_back({xPos + w, yPos    , 0.f});
-//            characterMesh.vertices.push_back({xPos + w, yPos + h, 0.f});
-//
-//            characterMesh.textureCoordinates.push_back({ch.coords.x, ch.coords.y});
-//            characterMesh.textureCoordinates.push_back({ch.coords.x, ch.coords.w});
-//            characterMesh.textureCoordinates.push_back({ch.coords.z, ch.coords.w});
-//            characterMesh.textureCoordinates.push_back({ch.coords.x, ch.coords.y});
-//            characterMesh.textureCoordinates.push_back({ch.coords.z, ch.coords.w});
-//            characterMesh.textureCoordinates.push_back({ch.coords.z, ch.coords.y});
+            drawQuad2D(atlas, a, shader, camera, ch.coords);
 
 			// now advance cursors for next glyph (note that advance is number of 1/64 pixels)
 			x += (float) (ch.advance >> 6) * transform.scale.x; // bitshift by 6 to get value in pixels (2^6 = 64)
 		}
-
-        //for(auto batch : batcher2D.prepare()){
-        //    renderMesh(batch.vertexArray, Transform(), *batch.textures, batch.shader, camera);
-        //    batcher2D.clear();
-        //}
-
-
-//        characterMesh.recalculateMesh();
-//
-//        // characterMesh.vertexArray->getVertexBuffers()[0]->setData(squareVertices.data(), squareVertices.size() * sizeof(Vertex));
-//        // characterMesh.vertexArray->getIndexBuffer  ()   ->setData(squareIndices .data(), squareIndices .size() * sizeof( uint ));
-//
-//        glBindVertexArray(characterMesh.vertexArray->getID());
-//        //glBindVertexArray(0);
-//        //glBindBuffer(GL_ARRAY_BUFFER, characterMesh.vertexBuffer->getID());
-//        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, characterMesh.vertexArray->getIndexBuffer()->getID());
-//
-//        glDrawElements(GL_TRIANGLES, (int) characterMesh.vertexArray->getIndexBuffer()->getSize(), GL_UNSIGNED_INT, nullptr);
-//
-//        glBindVertexArray(0);
-//
-//        characterMesh.vertices.clear();
-//        characterMesh.indices .clear();
-//        characterMesh.textureCoordinates.clear();
 	}
 
     bool fir = false;
@@ -304,7 +274,7 @@ namespace PetrolEngine {
     void OpenGLRenderer::renderMesh(const VertexArray* vao, const Transform& transform, const Vector<const Texture*>& textures, Shader* shader, const Camera* camera) { LOG_FUNCTION();
 		if(shader == nullptr) {LOG("ABORTING OBJECT PROVIDED WITH SHADER NULLPTR.", 2); return;}
 		glBindVertexArray(vao->getID());
-    glUseProgram(shader->getID());
+        glUseProgram(shader->getID());
 
         struct View {
             glm::mat4 model;
@@ -343,11 +313,6 @@ namespace PetrolEngine {
 		shader->setVec3 ( "light[0].diffuse"  ,  1.0f,  1.0f, 1.0f );
 		shader->setVec3 ( "light[0].specular" ,  0.0f,  0.0f, 0.0f );
 
-		// if (currentShader != mesh.material.shader->ID) {
-		// 	mesh.material.shader->use();
-		// 	currentShader = mesh.material.shader->ID;
-		// }
-
 		// loading textures into the buffers
 		uint32 diffuseNumber  = 1;
 		uint32 heightNumber   = 1;
@@ -380,32 +345,9 @@ namespace PetrolEngine {
         if(vao->getVertexBuffers().size() == 0)
             LOG("No vertex buffers at draw.", 3);
 
-        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vao->getIndexBuffer()->getID());
-
-        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vao->getIndexBuffer()->getID());
-        //glBindBuffer(GL_ARRAY_BUFFER, vao->getVertexBuffers()[0]->getID());
-
 		glDrawElements(GL_TRIANGLES, (int) vao->getIndexBuffer()->getSize(), GL_UNSIGNED_INT, nullptr);
         glBindVertexArray(0);
 	}
-
-	/* Pseudo fragment shader
-	* 
-	* struct quad {
-	*     textureSampler texture;
-	*         
-	* }
-	* 
-	* 
-	* 
-	* 
-	*
-	* 
-	*/
-
-    //void OpenGLRenderer::drawQuad2D(Material material, Transform transform) {
-//
-	//}
 	
 	void OpenGLRenderer::clear() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

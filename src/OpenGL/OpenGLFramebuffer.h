@@ -10,10 +10,9 @@ namespace PetrolEngine{
     public:
         OpenGLFramebuffer(const FramebufferSpecification& spec);
 
-        void addAttachment(Texture*& texture) override;
+        void addAttachment(Texture* texture) override;
 
         ~OpenGLFramebuffer() override;
-
     };
 
 }

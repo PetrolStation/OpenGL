@@ -24,8 +24,9 @@ namespace PetrolEngine {
 			{TextureFormat::RGBA16, {GL_RGBA, GL_RGBA16}},
 			{TextureFormat::RGBA8 , {GL_RGBA, GL_RGBA8 }},
 			{TextureFormat::RGB16 , {GL_RGB , GL_RGB16 }},
-            {TextureFormat::RGB8  , {GL_RGB , GL_RGB8  }},
-			{TextureFormat::RED   , {GL_RED , GL_RED   }}
+      {TextureFormat::RGB8  , {GL_RGB , GL_RGB8  }},
+			{TextureFormat::RED   , {GL_RED , GL_RED   }},
+			{TextureFormat::DEPTH24STENCIL8, {GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL}}
 		};
 
         const UnorderedMap<TextureType, GLuint> textureTypeLookupTable{

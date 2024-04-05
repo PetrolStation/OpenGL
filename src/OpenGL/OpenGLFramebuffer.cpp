@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 
+#include "Core/Renderer/Texture.h"
 #include "OpenGLFramebuffer.h"
 
 namespace PetrolEngine{
@@ -9,7 +10,7 @@ namespace PetrolEngine{
         OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferSpecification& spec) {
             glGenFramebuffers(1, &id);
             glBindFramebuffer(GL_FRAMEBUFFER, id);
-
+/*
             glGenTextures(1, &tid);
             glBindTexture(GL_TEXTURE_2D, tid);
 
@@ -26,7 +27,7 @@ namespace PetrolEngine{
             glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, spec.width, spec.height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
 
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, did, 0);
-
+*/
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
                 LOG("Framebuffer is not complete!", 2);
 
@@ -39,14 +40,20 @@ namespace PetrolEngine{
             for(Texture* texture : attachments) delete texture;
         }
 
-        void OpenGLFramebuffer::addAttachment(Texture*& texture) {
+        void OpenGLFramebuffer::addAttachment(Texture* texture) {
             attachments.push_back(texture);
-            texture = nullptr;
+            //texture = nullptr;
 
             glBindFramebuffer(GL_FRAMEBUFFER, id);
+
             glBindTexture(GL_TEXTURE_2D, texture->getID());
 
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->getID(), 0);
+            if(texture->format == TextureFormat::DEPTH24STENCIL8){
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, texture->getID(), 0);
+            }else{
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->getID(), 0);
+            }
+            
 
             if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
                 LOG("Framebuffer is not complete!", 2);

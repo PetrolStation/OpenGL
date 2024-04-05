@@ -1,5 +1,8 @@
 #include <PCH.h>
 
+#include "Core/Aliases.h"
+#include "Core/DebugTools.h"
+#include "Core/Renderer/Shader.h"
 #include "OpenGLShader.h"
 
 #include <Core/Files.h>
@@ -30,7 +33,21 @@ namespace PetrolEngine {
         glUniformBlockBinding(this->ID, bind, uniformBuffer->getBinding());
     }
 
-    Vector<uint32>* OpenGLShader::fromSpvToGlslSpv(Vector<uint32>* spv, ShaderType type) {
+    Vector<uint32>* OpenGLShader::fromSpvToGlslSpv(Vector<uint32>* spv, ShaderType type) { LOG_FUNCTION();
+        String cacheName = "glsl_" + name + shaderTypeToShadercExtensionS(type) + ".cache";
+        if(std::filesystem::exists(cacheName) && !Shader::alwaysCompile){ 
+            std::ifstream file(cacheName, std::ios::in | std::ios::binary);
+
+            file.seekg (0, file.end);
+            int length = file.tellg();
+            file.seekg (0, file.beg);
+            
+            Vector<uint32>* res = new Vector<uint32>;
+            res->resize(length/sizeof(uint32));
+            file.read((char*)res->data(), length);
+            return res;
+        }
+        
         String source = spirv_cross::CompilerGLSL(*spv).compile();
 
         shaderc::Compiler compiler;
@@ -46,9 +63,14 @@ namespace PetrolEngine {
             options
         );
 
-        if(!result.GetCompilationStatus())
-            return new Vector<uint32>(result.cbegin(), result.cend());
+        if(!result.GetCompilationStatus()){
+            std::ofstream file(cacheName, std::ios::out | std::ios::binary);
+            Vector<uint32>* res = new Vector<uint32>(result.cbegin(), result.cend());
 
+            file.write((char*)res->data(), res->size()*sizeof(uint32));
+            file.close();
+            return res;
+        }
 
         LOG("Shader compilation failed: " + result.GetErrorMessage(), 3);
         return nullptr;
@@ -56,7 +78,7 @@ namespace PetrolEngine {
 
     void OpenGLShader::compileFromSpv(Vector<uint32>*   vertexByteCode,
                                       Vector<uint32>* fragmentByteCode,
-                                      Vector<uint32>* geometryByteCode ){
+                                      Vector<uint32>* geometryByteCode ){ LOG_FUNCTION();
         uint   vertexShaderID = 0;
         uint fragmentShaderID = 0;
         uint geometryShaderID = 0;
@@ -144,7 +166,7 @@ namespace PetrolEngine {
 
     void OpenGLShader::compileNative( const String& vertexShaderSourceCode  ,
                                       const String& fragmentShaderSourceCode,
-                                      const String& geometryShaderSourceCode ) {
+                                      const String& geometryShaderSourceCode ) { LOG_FUNCTION();
         this->  vertexShaderID = 0;
         this->fragmentShaderID = 0;
         this->geometryShaderID = 0;
@@ -237,7 +259,7 @@ namespace PetrolEngine {
         glUniformMatrix4fv(glGetUniformLocation(ID, uniform.c_str()), 1, GL_FALSE, &mat[0][0]);
     }
 
-    int OpenGLShader::checkProgramCompileErrors(GLuint id) {
+    int OpenGLShader::checkProgramCompileErrors(GLuint id) { LOG_FUNCTION();
         GLint success;
         GLchar infoLog[1024];
 
@@ -253,7 +275,7 @@ namespace PetrolEngine {
         return 1;
     }
 
-    int OpenGLShader::checkShaderCompileErrors(GLuint shader, const String& type) {
+    int OpenGLShader::checkShaderCompileErrors(GLuint shader, const String& type) { LOG_FUNCTION();
         GLint success;
         GLchar infoLog[1024];
 

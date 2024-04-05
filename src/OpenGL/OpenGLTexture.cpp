@@ -24,6 +24,17 @@ namespace PetrolEngine {
 		//	glCreateTextures(GL_TEXTURE_2D, 1, &id);
 		//	glTexStorage2D  (GL_TEXTURE_2D, 1, GLFormat, width, height);
 
+        if(format == TextureFormat::DEPTH24STENCIL8){
+            glTexImage2D(
+                GL_TEXTURE_2D, 0, GLFormat.first, width, height, 0, 
+                GLFormat.second, GL_UNSIGNED_INT_24_8, NULL
+            );
+            //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        }
+
         if(type == TextureType::Texture2D) {
             if(width && height) glTexImage2D(GL_TEXTURE_2D, 0, GLFormat.second, width, height, 0, GLFormat.first, GL_UNSIGNED_BYTE, nullptr);
 
