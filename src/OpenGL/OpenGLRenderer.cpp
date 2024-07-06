@@ -202,6 +202,7 @@ namespace PetrolEngine {
             renderMesh(batch.vertexArray, a, *batch.textures, batch.shader, batcher2D.camera);
             batcher2D.clear();
             delete  batcher2D.transform;
+            batcher2D.transform = nullptr;
         }
 
     }
